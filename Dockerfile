@@ -17,23 +17,22 @@ RUN dpkg --add-architecture i386 && \
     apt-get clean
 
 # Download and untar SDK
-ENV ANDROID_SDK_URL https://dl.google.com/android/repository/tools_r25.2.3-linux.zip
+
+COPY sdk-tools-linux-3859397.zip /tmp/sdk-tools-linux-3859397.zip
 RUN mkdir -p /usr/local/android-sdk-linux
 RUN cd /tmp &&\
-      wget "${ANDROID_SDK_URL}" && \
-      unzip tools_r25.2.3-linux.zip && \
-      mv /tmp/tools /usr/local/android-sdk-linux/tools && \
-      rm -rf /tmp/*
+    unzip -d /usr/local/android-sdk-linux/ sdk-tools-linux-3859397.zip && \
+    rm -rf /tmp/*
 
 ENV ANDROID_HOME /usr/local/android-sdk-linux
 ENV ANDROID_SDK /usr/local/android-sdk-linux
-ENV PATH ${ANDROID_HOME}/tools:$ANDROID_HOME/platform-tools:$PATH
+ENV PATH $ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$PATH
 
 
+COPY gradle-3.4-bin.zip /tmp/gradle-3.4-bin.zip
 RUN cd /tmp && \
-  wget https://services.gradle.org/distributions/gradle-3.4-bin.zip && \
-  unzip -d /opt/gradle gradle-3.4-bin.zip && \
-  rm -rf /tmp/*
+    unzip -d /opt/gradle gradle-3.4-bin.zip && \
+    rm -rf /tmp/*
 
 ENV PATH $PATH:/opt/gradle/gradle-3.4/bin
 
@@ -42,9 +41,11 @@ ENV TERM dumb
 ENV JAVA_OPTS -Xms256m -Xmx512m
 
 
-
-COPY android_sdk_components.env /android_sdk_components.env
-RUN echo y | android update sdk --no-ui --all --filter "$(cat /android_sdk_components.env)"
+COPY android_sdk_components.env /tmp/android_sdk_components.env
+RUN cd /tmp && sdkmanager --update && \
+    yes | sdkmanager --licenses && \
+    sdkmanager --package_file=android_sdk_components.env && \
+    rm -rf /tmp/*
 
 WORKDIR /root
 CMD ["/bin/bash"]

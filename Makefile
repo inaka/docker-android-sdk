@@ -11,7 +11,7 @@ COMPOSE        ?= $(shell which docker-compose)
 
 DKR_REGISTRY   ?= inakaops
 DKR_IMAGE      ?= android-sdk
-DKR_TAG        ?= 25.2.3
+DKR_TAG        ?= 26
 
 DKR_BUILD_OPTS ?= -t $(DKR_REGISTRY)/$(DKR_IMAGE):$(DKR_TAG)
 
